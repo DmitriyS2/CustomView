@@ -36,13 +36,15 @@ class StatsView @JvmOverloads constructor(
         }
     }
 
-    private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+    private val paint = Paint(
+        Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeWidth = lineWidth
         strokeCap = Paint.Cap.ROUND
         strokeJoin = Paint.Join.ROUND
     }
-    private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+    private val textPaint = Paint(
+        Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
         textAlign = Paint.Align.CENTER
         textSize = fontSize
@@ -69,15 +71,19 @@ class StatsView @JvmOverloads constructor(
         }
 
         var startFrom = -90F
+        var sumPercents = 0F
         for ((index, datum) in data.withIndex()) {
-            val angle = 360F * datum
+         //   val angle = 360F * datum
+            val angle = 360F * (datum/data.sum())
+            sumPercents +=datum/data.sum()
             paint.color = colors.getOrNull(index) ?: randomColor()
             canvas.drawArc(oval, startFrom, angle, false, paint)
             startFrom += angle
         }
 
         canvas.drawText(
-            "%.2f%%".format(data.sum() * 100),
+         //   "%.2f%%".format(data.sum() * 100),
+            "%.2f%%".format(sumPercents * 100),
             center.x,
             center.y + textPaint.textSize / 4,
             textPaint,
