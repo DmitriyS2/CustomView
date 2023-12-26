@@ -8,6 +8,7 @@ import android.graphics.RectF
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
+import androidx.core.content.res.TypedArrayUtils.getResourceId
 import androidx.core.content.withStyledAttributes
 import ru.netology.nmedia.R
 import ru.netology.nmedia.util.AndroidUtils
@@ -53,19 +54,21 @@ class StatsView @JvmOverloads constructor(
         textSize = fontSize
     }
 
-    private val paintCircle = Paint(
-        Paint.ANTI_ALIAS_FLAG
-    ).apply {
-        style = Paint.Style.FILL
-        strokeWidth = lineWidth
-        color = colors.getOrNull(0) ?: randomColor()
-    }
+//    private val paintCircle = Paint(
+//        Paint.ANTI_ALIAS_FLAG
+//    ).apply {
+//        style = Paint.Style.FILL
+//        strokeWidth = lineWidth
+//        color = colors.getOrNull(0) ?: randomColor()
+//    }
 
     var data: List<Float> = emptyList()
         set(value) {
             field = value
             invalidate()
         }
+
+    private val listAngle = listOf(-90F, 0F, 90F, 180F)
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         radius = min(w, h) / 2F - lineWidth / 2
@@ -80,25 +83,36 @@ class StatsView @JvmOverloads constructor(
         if (data.isEmpty()) {
             return
         }
-        var startFrom = -90F
+
         var sumPercents = 0F
-//        for ((index, datum) in data.withIndex()) {
-//         //   val angle = 360F * datum
-//            val angle = 360F * (datum/data.sum())
-//            sumPercents +=datum/data.sum()
-//            paint.color = colors.getOrNull(index) ?: randomColor()
-//            canvas.drawArc(oval, startFrom, angle, false, paint)
-//            startFrom += angle
-//        }
-        for (index in data.indices) {
-            val angle = 360F * (data[index] / data.sum())
-            sumPercents += data[index] / data.sum()
-            paint.color = colors.getOrNull(index) ?: randomColor()
-            canvas.drawArc(oval, startFrom, angle, false, paint)
-            startFrom += angle
+        var indexStart = 0
+        for (i in data.indices) {
+            if(data[i]==0F) {
+                indexStart=i
+                break
+            }
+        }
+     //   var startFrom = (indexStart*90F) - 90F
+        for (i  in data.indices) {
+            val angle = 360F / data.size
+
+            if(data[indexStart]==0F) {
+                paint.color = resources.getColor(R.color.grey)
+                sumPercents -= (1 / data.size.toFloat())
+            } else {
+                paint.color = colors.getOrNull(indexStart) ?: randomColor()
+            }
+                canvas.drawArc(oval, listAngle[indexStart], angle, false, paint)
+           //     startFrom += angle
+                indexStart++
+                if(indexStart==data.size) {
+                    indexStart=0
+                }
+
+            sumPercents += (1 / data.size.toFloat())
         }
 
-        canvas.drawCircle(center.x, center.y - radius, paintCircle.strokeWidth / 2F, paintCircle)
+    //    canvas.drawCircle(center.x- radius, center.y, paintCircle.strokeWidth / 2F, paintCircle)
 
         canvas.drawText(
             //   "%.2f%%".format(data.sum() * 100),
