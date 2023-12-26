@@ -6,6 +6,7 @@ import android.graphics.Paint
 import android.graphics.PointF
 import android.graphics.RectF
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import androidx.core.content.withStyledAttributes
 import ru.netology.nmedia.R
@@ -37,17 +38,27 @@ class StatsView @JvmOverloads constructor(
     }
 
     private val paint = Paint(
-        Paint.ANTI_ALIAS_FLAG).apply {
+        Paint.ANTI_ALIAS_FLAG
+    ).apply {
         style = Paint.Style.STROKE
         strokeWidth = lineWidth
         strokeCap = Paint.Cap.ROUND
         strokeJoin = Paint.Join.ROUND
     }
     private val textPaint = Paint(
-        Paint.ANTI_ALIAS_FLAG).apply {
+        Paint.ANTI_ALIAS_FLAG
+    ).apply {
         style = Paint.Style.FILL
         textAlign = Paint.Align.CENTER
         textSize = fontSize
+    }
+
+    private val paintCircle = Paint(
+        Paint.ANTI_ALIAS_FLAG
+    ).apply {
+        style = Paint.Style.FILL
+        strokeWidth = lineWidth
+        color = colors.getOrNull(0) ?: randomColor()
     }
 
     var data: List<Float> = emptyList()
@@ -69,20 +80,28 @@ class StatsView @JvmOverloads constructor(
         if (data.isEmpty()) {
             return
         }
-
         var startFrom = -90F
         var sumPercents = 0F
-        for ((index, datum) in data.withIndex()) {
-         //   val angle = 360F * datum
-            val angle = 360F * (datum/data.sum())
-            sumPercents +=datum/data.sum()
+//        for ((index, datum) in data.withIndex()) {
+//         //   val angle = 360F * datum
+//            val angle = 360F * (datum/data.sum())
+//            sumPercents +=datum/data.sum()
+//            paint.color = colors.getOrNull(index) ?: randomColor()
+//            canvas.drawArc(oval, startFrom, angle, false, paint)
+//            startFrom += angle
+//        }
+        for (index in data.indices) {
+            val angle = 360F * (data[index] / data.sum())
+            sumPercents += data[index] / data.sum()
             paint.color = colors.getOrNull(index) ?: randomColor()
             canvas.drawArc(oval, startFrom, angle, false, paint)
             startFrom += angle
         }
 
+        canvas.drawCircle(center.x, center.y - radius, paintCircle.strokeWidth / 2F, paintCircle)
+
         canvas.drawText(
-         //   "%.2f%%".format(data.sum() * 100),
+            //   "%.2f%%".format(data.sum() * 100),
             "%.2f%%".format(sumPercents * 100),
             center.x,
             center.y + textPaint.textSize / 4,
